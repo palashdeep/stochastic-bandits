@@ -4,7 +4,7 @@ This project studies the stochastic multi-armed bandit problem with unknown rewa
 
 ## Problem
 
-We consider a stochastic K-armed bandit with independent arms. Each arm i produces a Bernoulli reward with unknown mean μ<sub>i<\sub>. At each time step, the agent selects an arm, observes a reward, and updates its policy. Performace is measured as expected cummulative regret relative to the optimal arm.
+We consider a stochastic K-armed bandit with independent arms. Each arm i produces a Bernoulli reward with unknown mean μ<sub>i</sub>. At each time step, the agent selects an arm, observes a reward, and updates its policy. Performace is measured as expected cummulative regret relative to the optimal arm.
 
 ## Why Regret?
 
@@ -53,6 +53,7 @@ This study focuses on independent stochastic bandits. Extensions could exploit s
 ## Relation to Decision-Making under Uncertainty
 
 Bandit problems formalize sequential decision-making under uncertainty, where actions both generate reward and reveal information. This perspective closely mirrors real-world settings such as trading, where decisions must be made before uncertainty is resolved.
+
 
 
 
