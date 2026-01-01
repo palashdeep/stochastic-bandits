@@ -2,7 +2,7 @@ import numpy as np
 from scipy.stats import beta
 import matplotlib.pyplot as plt
 
-def set_integer_xticks(ax, horizon, max_ticks=8):
+def set_integer_xticks(ax, horizon, max_ticks=10):
     """Set integer x-ticks for a discrete horizon without clutter"""
     step = max(1, horizon // max_ticks)
     ticks = np.arange(0, horizon, step)
@@ -10,7 +10,7 @@ def set_integer_xticks(ax, horizon, max_ticks=8):
     ax.set_xticks(ticks)
     ax.set_xlim(0, horizon-1)
 
-def plot_results(results, horizon=20):
+def plot_results(results, horizon=20, savefig=False):
     """Cumulative mean regret with/without std bands"""
     x = np.arange(horizon)
 
@@ -51,9 +51,11 @@ def plot_results(results, horizon=20):
     ax2.legend()
 
     plt.tight_layout()
+    if savefig:
+        plt.savefig("plots/cumulative_regret.png", bbox_inches='tight')
     plt.show()
 
-def plot_pulls(results, horizon=20):
+def plot_pulls(results, horizon=20, savefig=False):
     """Plot of arm selection percentage"""
     x = np.arange(horizon)
 
@@ -67,22 +69,24 @@ def plot_pulls(results, horizon=20):
         ax.set_title(f'Arm Selection Probability - {policy_name}')
         ax.set_xlabel('Horizon')
         ax.set_ylabel('P(arm selected)')
-        ax.set_ylim(0, 1)
+        ax.set_ylim(-0.05, 1.05)
         set_integer_xticks(ax, horizon)
         ax.legend()
 
     plt.tight_layout()
+    if savefig:
+        plt.savefig("plots/arm_selection.png", bbox_inches='tight')
     plt.show()
 
-def plot_ts_posterior_evolution(alpha_history, beta_history, arm_index, timesteps):
+def plot_ts_posterior_evolution(alpha_history, beta_history, arm_index, timesteps, savefig=False):
     """Shows posterior evolution for TS for one run"""
     x = np.linspace(0, 1, 500)
 
     plt.figure(figsize=(8, 5))
 
     for t in timesteps:
-        a = alpha_history[t][arm_index]
-        b = beta_history[t][arm_index]
+        a = alpha_history[t-1][arm_index]
+        b = beta_history[t-1][arm_index]
         y = beta.pdf(x, a, b)
         plt.plot(x, y, label=f"t = {t}")
 
@@ -91,9 +95,11 @@ def plot_ts_posterior_evolution(alpha_history, beta_history, arm_index, timestep
     plt.title(f"Posterior evolution (Arm {arm_index + 1})")
     plt.legend()
     plt.tight_layout()
+    if savefig:
+        plt.savefig("plots/ts_posterior.png", bbox_inches='tight')
     plt.show()
 
-def plot_regret_distribution(results):
+def plot_regret_distribution(results, savefig=False):
     """Plots histogram of final cumulative regret distribution"""
     labels = list(results.keys())
     data = [np.sum(np.array(results[label]["regrets"]), axis=1) for label in labels]
@@ -103,4 +109,6 @@ def plot_regret_distribution(results):
     plt.ylabel("Final Cumulative regret")
     plt.title("Regret variability across runs")
     plt.tight_layout()
+    if savefig:
+        plt.savefig("plots/regret_variability.png", bbox_inches='tight')
     plt.show()

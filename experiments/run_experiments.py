@@ -50,10 +50,10 @@ if __name__ == "__main__":
     arms = 3
     arms_arr = [1, 2, 3]
 
-    env = Environment(name="Environment 1", arms=arms, mus=[0.53, 0.55, 0.53])
+    env = Environment(name="Environment 1", arms=arms, mus=[0.8, 0.9, 0.7])
     policies = [
         GreedyPolicy(env.arms),
-        e_GreedyPolicy(env.arms, epsilon=0.1),
+        e_GreedyPolicy(env.arms, epsilon=0.05),
         UCBPolicy(env.arms),
         ThompsonSamplingPolicy(env.arms)
     ]
@@ -86,9 +86,9 @@ if __name__ == "__main__":
 
         avg_results[policy.name] = (avg_regrets, std_regrets, arms_pull)
 
-    plot_results(avg_results, horizon)
-    plot_pulls(avg_results, horizon)
-    plot_regret_distribution(results)
+    plot_results(avg_results, horizon, True)
+    plot_pulls(avg_results, horizon, True)
+    plot_regret_distribution(results, True)
 
     # Experiment 2: for TS posterior evolution
 
@@ -102,4 +102,4 @@ if __name__ == "__main__":
 
     alpha_hist, beta_hist = run_ts_experiment(env, policy, horizon)
 
-    plot_ts_posterior_evolution(alpha_hist, beta_hist, arm_to_plot-1, timesteps)
+    plot_ts_posterior_evolution(alpha_hist, beta_hist, arm_to_plot-1, timesteps, True)
