@@ -86,9 +86,9 @@ if __name__ == "__main__":
 
         avg_results[policy.name] = (avg_regrets, std_regrets, arms_pull)
 
-    plot_results(avg_results, horizon, True)
-    plot_pulls(avg_results, horizon, True)
-    plot_regret_distribution(results, True)
+    plot_results(avg_results, horizon, "plots/cumulative_regret.png")
+    plot_pulls(avg_results, horizon, "plots/arm_selection.png")
+    plot_regret_distribution(results, "plots/ts_posterior.png")
 
     # Experiment 2: for TS posterior evolution
 
@@ -102,4 +102,4 @@ if __name__ == "__main__":
 
     alpha_hist, beta_hist = run_ts_experiment(env, policy, horizon)
 
-    plot_ts_posterior_evolution(alpha_hist, beta_hist, arm_to_plot-1, timesteps, True)
+    plot_ts_posterior_evolution(alpha_hist, beta_hist, arm_to_plot-1, timesteps, "plots/regret_variability.png")

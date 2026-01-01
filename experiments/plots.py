@@ -10,7 +10,7 @@ def set_integer_xticks(ax, horizon, max_ticks=10):
     ax.set_xticks(ticks)
     ax.set_xlim(0, horizon-1)
 
-def plot_results(results, horizon=20, savefig=False):
+def plot_results(results, horizon=20, fname=None):
     """Cumulative mean regret with/without std bands"""
     x = np.arange(horizon)
 
@@ -51,11 +51,11 @@ def plot_results(results, horizon=20, savefig=False):
     ax2.legend()
 
     plt.tight_layout()
-    if savefig:
-        plt.savefig("plots/cumulative_regret.png", bbox_inches='tight')
+    if fname:
+        plt.savefig(fname, bbox_inches='tight')
     plt.show()
 
-def plot_pulls(results, horizon=20, savefig=False):
+def plot_pulls(results, horizon=20, fname=None):
     """Plot of arm selection percentage"""
     x = np.arange(horizon)
 
@@ -74,11 +74,11 @@ def plot_pulls(results, horizon=20, savefig=False):
         ax.legend()
 
     plt.tight_layout()
-    if savefig:
-        plt.savefig("plots/arm_selection.png", bbox_inches='tight')
+    if fname:
+        plt.savefig(fname, bbox_inches='tight')
     plt.show()
 
-def plot_ts_posterior_evolution(alpha_history, beta_history, arm_index, timesteps, savefig=False):
+def plot_ts_posterior_evolution(alpha_history, beta_history, arm_index, timesteps, fname=None):
     """Shows posterior evolution for TS for one run"""
     x = np.linspace(0, 1, 500)
 
@@ -95,11 +95,11 @@ def plot_ts_posterior_evolution(alpha_history, beta_history, arm_index, timestep
     plt.title(f"Posterior evolution (Arm {arm_index + 1})")
     plt.legend()
     plt.tight_layout()
-    if savefig:
-        plt.savefig("plots/ts_posterior.png", bbox_inches='tight')
+    if fname:
+        plt.savefig(fname, bbox_inches='tight')
     plt.show()
 
-def plot_regret_distribution(results, savefig=False):
+def plot_regret_distribution(results, fname=None):
     """Plots histogram of final cumulative regret distribution"""
     labels = list(results.keys())
     data = [np.sum(np.array(results[label]["regrets"]), axis=1) for label in labels]
@@ -109,6 +109,6 @@ def plot_regret_distribution(results, savefig=False):
     plt.ylabel("Final Cumulative regret")
     plt.title("Regret variability across runs")
     plt.tight_layout()
-    if savefig:
-        plt.savefig("plots/regret_variability.png", bbox_inches='tight')
+    if fname:
+        plt.savefig(fname, bbox_inches='tight')
     plt.show()
