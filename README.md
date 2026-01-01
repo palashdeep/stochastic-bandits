@@ -4,7 +4,7 @@ This project studies the stochastic multi-armed bandit problem with unknown rewa
 
 ## Problem
 
-We consider a stochastic K-armed bandit with independent arms. Each arm i produces a Bernoulli reward with unknown mean μ<sub>i</sub>. At each time step, the agent selects an arm, observes a reward, and updates its policy. Performace is measured as expected cummulative regret relative to the optimal arm.
+We consider a stochastic K-armed bandit with independent arms. Each arm i produces a Bernoulli reward with unknown mean μ<sub>i</sub>. At each time step, the agent selects an arm, observes a reward, and updates its policy. Performance is measured as expected cumulative regret relative to the optimal arm.
 
 ## Why Regret?
 
@@ -19,40 +19,50 @@ Regret measures opportunity cost of learning while acting. Unlike accuracy or re
 
 ## Experimental Design
 
-Experiments use a 3-armed Bernoulli bandit with carefully chosen mean rewards to expose the exploration-exploitation tradeoff. Each experiment runs for T=5000 steps and results are averaged over 1000 independent runs. All policies are evaluated on the same environments. Regret is computed using the true arm means ranther than the realized rewards to isolate learning behavior from noise.
+Experiments use a 3-armed Bernoulli bandit with carefully chosen mean rewards to expose the exploration-exploitation tradeoff. Each experiment runs for T=5000 steps and results are averaged over 1000 independent runs. All policies are evaluated on the same environments. Regret is computed using the true arm means rather than the realized rewards to isolate learning behavior from noise. We study both easy instances (large gaps betweem arm means) and harder instances (small gaps), as algorithmic behavior depends strongly on how quickly uncertainty can be resolved. In particular, finite horizon performance can differ substantially from worst-case asymptotic guarantees.
 
 ## Results and Diagnostics
 
-### Cummulative Regret
+### Cumulative Regret
 
-We plot mean cummulative regret over time to compare learning efficiency across policies.
+This figure shows mean cumulative regret over time, averaged across independent runs. Greedy suffers linear regret due to premature commitment, while ε-greedy reduces lock-in at the cost of persistent random exploration. UCB exhibits conservative exploration driven by worst-case optimism, leading to higher finite-horizon regret in this easy instance. Thompson Sampling rapidly concentrates on the optimal arm once posterior uncertainty is resolved, resulting in very low regret.
+
+![Mean cumulative regret over time, averaged across independent runs.](plots/cumulative_regret.png)
 
 ### Action Selection Behavior
 
-We analyze fraction of times each arm is selected to understand how policies allocate exploration
+We plot the fraction of times each arm is selected to illustrate how different policies allocate exploration. Greedy locks in early based on noisy estimates, ε-greedy continues sampling suboptimal arms uniformly, and UCB explores aggressively until confidence bounds shrink. Thompson Sampling allocates exploration in proportion to posterior uncertainty and naturally stops exploring once alternative arms are unlikely to be optimal.
+
+![Fraction of times each arm is selected as a function of time.](plots/arm_selection.png)
 
 ### Posterior Evolution (Thompson Sampling)
 
-We visualize the evolution of posterior distributions for selected arms to illustrate how uncertainty collapses with data
+The figure below illustrates how posterior uncertainty over an arm's mean reward collapses as data is observed. Once the probability that alternative arms are optimal becomes negligible, Thompson Sampling naturally stops exploring.
+
+![Posterior evolution for Thompson Sampling](plots/ts_posterior.png)
 
 ### Regret Variability
 
-We examine the distribution of final regret across runs to assess robustness
+Distribution of final cumulative regret across independent runs. While Thompson Sampling achieves the lowest average regret, UCB exhibits higher variability due to prolonged exploration, reflecting the trade-off between worst-case robustness and finite-horizon performance.
+
+![Distribution of final cumulative regret across independent runs.](plots/regret_variability.png)
 
 ## Observations
 
-- Greedy failure modes
-- ε-Greedy inefficiency
-- UCB vs TS tradeoffs
-- Practical implications
+Differences between alogrithms are driven by how uncertainty is treated rather than implementation details: Greedy ignores uncertainty, ε-greedy explores indiscriminately, UCN optimizes for worst-case guarantees, and Thompson Sampling explores only when additional information is likely to change the optimal decision.
+
+- **Greedy** often commits early to suboptimal arms due to noise in initial observations, leading to linear regret.
+- **ε-Greedy** mitigates premature lock-in but explores indiscriminately, incurring a persistent regret floor from sampling clearly suboptimal arms.
+- **UCB** exhibits conservative exploration driven by worst-case optimism. In easy instances with large gaps and short horizons, this can lead to higher finite-horizon regret than ε-greedy, despite stronger asymptotic guarantees.
+- **Thompson Sampling** adapts exploration to posterior uncertainty. Once the probability that an alternative arms is optimal becomes negligible, exploration anturally collapses, often resulting in very low finite-horizon regret.
 
 ## Limitation \& Extensions
 
-This study focuses on independent stochastic bandits. Extensions could exploit structure across arms (e.g. linear or contextual bandits) or examine senstivity to prior misspecifications and heavy-tailed noise
+This study focuses on independent stochastic bandits. Extensions could exploit structure across arms (e.g. linear or contextual bandits) or examine sensitivity to prior misspecifications and heavy-tailed noise. In particular, Thompson Sampling's rapid concentration in Bernoulli bandits reflects the low noise of the reward model; higher-noise settings (e.g. Gaussian rewards) would induce longer exploration phases.
 
 ## Relation to Decision-Making under Uncertainty
 
-Bandit problems formalize sequential decision-making under uncertainty, where actions both generate reward and reveal information. This perspective closely mirrors real-world settings such as trading, where decisions must be made before uncertainty is resolved.
+Bandit problems formalize sequential decision-making under uncertainty, where actions both generate reward and reveal information. This perspective closely mirrors real-world settings such as trading, where decisions must be made before uncertainty is resolved. The contrast between UCB and Thompson Sampling highlights the difference between worst-case robustness and probability-weighted decision-making, a distinction that arises frequently in real-world trading and adaptive control problems.
 
 
 

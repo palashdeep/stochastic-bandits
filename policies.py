@@ -1,21 +1,23 @@
 import numpy as np
-from scipy.stats import beta
 
 class Policy: 
     def __init__(self, name, arms, rules, seed=None):
         self.reset(name, arms, rules, seed)
 
     def select_arm(self, arms):
+        """Arm selection rules"""
         if not arms or arms == 0:
             raise ValueError("Arms cannot be 0.")
         return self.rules(arms)
     
     def update(self, arm, reward):
+        """Update after arm pull"""
         arm_index = arm - 1  # Adjust for zero-based indexing
         self.total_counts[arm_index] += 1
         self.reward_counts[arm_index] += reward
 
     def reset(self, name, arms, rules, seed=None):
+        """Reset after each experiment"""
         self.name = name
         self.rules = rules
         self.reward_counts = [0]*arms

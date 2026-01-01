@@ -1,9 +1,12 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.stats import beta
+
 from policies import GreedyPolicy, e_GreedyPolicy, UCBPolicy, ThompsonSamplingPolicy
 from environment import Environment
 
 def run_experiment(env, policy, horizon):
+    """Runs one experiment over horizon"""
     rewards = []
     regrets = []
     arms_pulled = []
@@ -19,10 +22,23 @@ def run_experiment(env, policy, horizon):
 
     return rewards, regrets, arms_pulled
 
+def run_ts_experiment(env, ts_policy, horizon):
+    """Runs one experiment with TS and saves alpha/beta history"""
+    alpha_history = []
+    beta_history = []
+
+    for t in range(horizon):
+        arm = ts_policy.select_arm(arms)
+        reward, regret = env.pull(arm)
+        ts_policy.update(arm, reward)
+
+        alpha_history.append(ts_policy.alpha.copy())
+        beta_history.append(ts_policy.beta.copy())
+
+    return alpha_history, beta_history
+
 def set_integer_xticks(ax, horizon, max_ticks=8):
-    """
-    Set integer x-ticks for a discrete horizon without clutter.
-    """
+    """Set integer x-ticks for a discrete horizon without clutter"""
     step = max(1, horizon // max_ticks)
     ticks = np.arange(0, horizon, step)
 
@@ -30,6 +46,7 @@ def set_integer_xticks(ax, horizon, max_ticks=8):
     ax.set_xlim(0, horizon-1)
 
 def plot_results(results, horizon=20):
+    """Cumulative mean regret with/without std bands"""
     x = np.arange(horizon)
 
     fig, axes = plt.subplots(1, 2, figsize=(12, 6))
@@ -43,10 +60,10 @@ def plot_results(results, horizon=20):
         cumulative_regrets = np.cumsum(regrets)
         cumulative_std = np.sqrt(np.cumsum(std_regrets ** 2))
 
-        # ---- Plot 1: cumulative regret ----
+        # cumulative regret
         ax1.plot(x, cumulative_regrets, label=policy_name)
 
-        # ---- Plot 2: cumulative regret with std bands ----
+        # cumulative regret with std bands
         line, = ax2.plot(x, cumulative_regrets, label=policy_name)
         ax2.fill_between(
             x,
@@ -72,6 +89,7 @@ def plot_results(results, horizon=20):
     plt.show()
 
 def plot_pulls(results, horizon=20):
+    """Plot of arm selection percentage"""
     x = np.arange(horizon)
 
     fig, axes = plt.subplots(2, 2, figsize=(12, 6), sharex=True, sharey=True)
@@ -91,61 +109,50 @@ def plot_pulls(results, horizon=20):
     plt.tight_layout()
     plt.show()
 
-# def posterior_evolution(policy, env, rounds):
-#     alpha = [1] * env.arms
-#     beta_params = [1] * env.arms
+def plot_ts_posterior_evolution(alpha_history, beta_history, arm_index, timesteps):
+    """Shows posterior evolution for TS for one run"""
+    x = np.linspace(0, 1, 500)
 
-#     for _ in range(rounds):
-#         arm = policy.select_arm(env.arms)
-#         reward, _ = env.pull(arm)
-#         policy.update(arm, reward)
+    plt.figure(figsize=(8, 5))
 
-#         arm_index = arm - 1
-#         alpha[arm_index] += reward
-#         beta_params[arm_index] += (1 - reward)
+    for t in timesteps:
+        a = alpha_history[t][arm_index]
+        b = beta_history[t][arm_index]
+        y = beta.pdf(x, a, b)
+        plt.plot(x, y, label=f"t = {t}")
 
-#     x = np.linspace(0, 1, 100)
-#     plt.figure(figsize=(10, 6))
-
-#     for i in range(env.arms):
-#         y = beta.pdf(x, alpha[i], beta_params[i])
-#         plt.plot(x, y, label=f'Arm {i + 1}')
-
-#     plt.title(f'Posterior Distributions after {rounds} Rounds - {policy.name}')
-#     plt.xlabel('Reward Probability')
-#     plt.ylabel('Density')
-#     plt.legend()
-#     plt.show()
+    plt.xlabel("Mean reward")
+    plt.ylabel("Density")
+    plt.title(f"Posterior evolution (Arm {arm_index + 1})")
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
 
 def plot_regret_distribution(results):
-    fig, axes = plt.subplots(2, 2, figsize=(12, 12))
-    axes = axes.flatten()
+    """Plots histogram of final cumulative regret distribution"""
+    labels = list(results.keys())
+    data = [np.sum(np.array(results[label]["regrets"]), axis=1) for label in labels]
 
-    for ax, (policy_name, data) in zip(axes, results.items()):
-        regrets_runs = np.array(data["regrets"])  # shape: (runs, horizon)
-
-        # Final cumulative regret per run
-        final_regrets = np.sum(regrets_runs, axis=1)
-
-        ax.hist(final_regrets, bins=30, alpha=0.7)
-        ax.set_title(f'Regret Distribution - {policy_name}')
-        ax.set_xlabel('Final Cumulative Regret')
-        ax.set_ylabel('Frequency')
-
+    plt.figure(figsize=(8, 5))
+    plt.boxplot(data, labels=labels, showfliers=False)
+    plt.ylabel("Final Cumulative regret")
+    plt.title("Regret variability across runs")
     plt.tight_layout()
     plt.show()
 
 if __name__ == "__main__":
+
+    # Experiment 1: To compare different policies
 
     horizon = 5000
     runs = 1000
     arms = 3
     arms_arr = [1, 2, 3]
 
-    env = Environment(name="Environment 1", arms=3, mus=[0.53, 0.55, 0.53])
+    env = Environment(name="Environment 1", arms=arms, mus=[0.53, 0.55, 0.53])
     policies = [
         GreedyPolicy(env.arms),
-        e_GreedyPolicy(env.arms, epsilon=0.05),
+        e_GreedyPolicy(env.arms, epsilon=0.1),
         UCBPolicy(env.arms),
         ThompsonSamplingPolicy(env.arms)
     ]
@@ -182,3 +189,16 @@ if __name__ == "__main__":
     plot_pulls(avg_results, horizon)
     plot_regret_distribution(results)
 
+    # Experiment 2: for TS posterior evolution
+
+    horizon = 1000
+    
+    env = Environment(name="Environment 2", arms=3, mus=[0.8, 0.9, 0.7])
+    policy = ThompsonSamplingPolicy(env.arms)
+
+    arm_to_plot = 2
+    timesteps = [10, 50, 200, 1000]
+
+    alpha_hist, beta_hist = run_ts_experiment(env, policy, horizon)
+
+    plot_ts_posterior_evolution(alpha_hist, beta_hist, arm_to_plot-1, timesteps)

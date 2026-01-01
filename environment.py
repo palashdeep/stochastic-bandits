@@ -5,6 +5,7 @@ class Environment:
         self.reset(name, arms, mus, seed)
 
     def reset(self, name, arms, mus, seed=None):
+        """Reset environment after each experiment"""
         self.name = name
         self.arms = arms
         if len(mus) != arms:
@@ -15,6 +16,7 @@ class Environment:
         self.rng = np.random.default_rng(self.seed)
 
     def pull(self, arm):
+        """Pull the selected arm and return reward"""
         if arm < 1 or arm > self.arms:
             raise ValueError("Arm index out of range.")
         arm -= 1  # Adjust for zero-based indexing
