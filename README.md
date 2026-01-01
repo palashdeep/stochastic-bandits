@@ -21,6 +21,9 @@ Regret measures opportunity cost of learning while acting. Unlike accuracy or re
 
 Experiments use a 3-armed Bernoulli bandit with carefully chosen mean rewards to expose the exploration-exploitation tradeoff. Each experiment runs for T=5000 steps and results are averaged over 1000 independent runs. All policies are evaluated on the same environments. Regret is computed using the true arm means rather than the realized rewards to isolate learning behavior from noise. We study both easy instances (large gaps betweem arm means) and harder instances (small gaps), as algorithmic behavior depends strongly on how quickly uncertainty can be resolved. In particular, finite horizon performance can differ substantially from worst-case asymptotic guarantees.
 
+Experiments can be run from the project root using:
+`python -m experiments.run_experiments`
+
 ## Results and Diagnostics
 
 ### Cumulative Regret
